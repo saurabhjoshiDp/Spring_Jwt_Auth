@@ -19,6 +19,11 @@ public class RegistrationController {
     @Autowired
     private ApplicationEventPublisher publisher;
 
+    @GetMapping("/register")
+    public String testing(){
+        return "<h1>@Get Register url is whitelisted</h1>";
+    }
+
     @PostMapping("/register")
     public String Register(@RequestBody UserModel userModel, final HttpServletRequest request){
         User user = userService.registerUser(userModel);
