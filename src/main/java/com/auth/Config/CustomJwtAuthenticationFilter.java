@@ -3,7 +3,9 @@ package com.auth.Config;
 
 import com.auth.Model.UserDetailModel;
 import com.auth.Utils.JWTUtils;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -26,15 +28,21 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String jwtToken = extractJwtToken(request);
-        if (StringUtils.hasText(jwtToken) && jwtUtils.validateToken(jwtToken)){
-            UserDetails userDetails = new User(jwtUtils.getUserName(jwtToken),"",jwtUtils.getClaimFromToken(jwtToken));
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails,"",userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+       try {
+           String jwtToken = extractJwtToken(request);
+           if (StringUtils.hasText(jwtToken) && jwtUtils.validateToken(jwtToken)) {
+               UserDetails userDetails = new User(jwtUtils.getUserName(jwtToken), "", jwtUtils.getClaimFromToken(jwtToken));
+               UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+               SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
-        }else{
-            System.out.println("Cannot set Security Context");
-        }
+           } else {
+               System.out.println("Cannot set Security Context");
+           }
+       } catch (ExpiredJwtException e){
+            request.setAttribute("exception",e);
+       } catch(BadCredentialsException e){
+            request.setAttribute("exception",e);
+       }
         filterChain.doFilter(request,response);
     }
 
