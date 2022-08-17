@@ -15,3 +15,7 @@ spring:
     user:
       password: pass
       name: user
+
+jwt:
+  secret: a5e486f3-313a-434f-9139-24aee910f95c
+  TTLms: 72000
